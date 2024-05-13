@@ -4,7 +4,8 @@ import "./App.css";
 
 // Define the EmailSignup component
 const EmailSignup = () => {
-  const DYNAMIC_ENVIRONMENT_ID = "ba0d0a82-60d5-4d63-8f61-29e3331eebc8";
+  const DYNAMIC_ENVIRONMENT_ID = process.env.REACT_APP_DYNAMIC_ENVIRONMENT_ID;
+  const API_SERVER = process.env.REACT_APP_API_URL;
 
   const [email, setEmail] = useState("");
   const [verifying, setVerifying] = useState(false);
@@ -98,7 +99,7 @@ const EmailSignup = () => {
         setJWT(response.jwt);
 
         // Optionally fetch existing wallets for the user
-        return fetch(`http://localhost:4000/users/me`, {
+        return fetch(`${API_SERVER}/users/me`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${response.jwt}`,
@@ -133,7 +134,7 @@ const EmailSignup = () => {
   };
 
   const createWallet = async () => {
-    fetch("http://localhost:4000/wallets", {
+    fetch(`${API_SERVER}/wallets`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${JWT}`,
@@ -161,7 +162,7 @@ const EmailSignup = () => {
       alert("Please select a wallet first.");
       return;
     }
-    fetch(`http://localhost:4000/wallets/${selectedWallet}/balance`, {
+    fetch(`${API_SERVER}/wallets/${selectedWallet}/balance`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${JWT}`,
@@ -193,7 +194,7 @@ const EmailSignup = () => {
       alert("Please enter a message to sign.");
       return;
     }
-    fetch(`http://localhost:4000/wallets/${selectedWallet}/sign`, {
+    fetch(`${API_SERVER}/wallets/${selectedWallet}/sign`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${JWT}`,
@@ -231,7 +232,7 @@ const EmailSignup = () => {
       return;
     }
 
-    fetch(`http://localhost:4000/wallets/${selectedWallet}/sendTransaction`, {
+    fetch(`${API_SERVER}/wallets/${selectedWallet}/sendTransaction`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${JWT}`,
@@ -323,11 +324,12 @@ const EmailSignup = () => {
           </button>
         </div>
       )}
-      {/* Divider */}
-      <hr className="my-4" />
       {/* Choose Wallet */}
       {wallets.length > 0 && (
         <>
+          {/* Divider */}
+          <hr className="my-4" />
+
           <p>Choose Wallet:</p>
           <div className="d-flex gap-3">
             <select
