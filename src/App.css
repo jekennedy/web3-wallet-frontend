@@ -40,3 +40,8 @@
 #jwt {
   display: none;
 }
+
+p.section {
+  font-weight: bold;
+  text-transform: uppercase;
+}

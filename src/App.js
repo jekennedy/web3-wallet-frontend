@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
-// Define the EmailSignup component
-const EmailSignup = () => {
+// Define the main component
+const Web3Wallet = () => {
   const DYNAMIC_ENVIRONMENT_ID = process.env.REACT_APP_DYNAMIC_ENVIRONMENT_ID;
   const API_SERVER = process.env.REACT_APP_API_URL;
 
@@ -330,7 +330,7 @@ const EmailSignup = () => {
           {/* Divider */}
           <hr className="my-4" />
 
-          <p>Choose Wallet:</p>
+          <p class="section">Choose Wallet</p>
           <div className="d-flex gap-3">
             <select
               id="walletDropdown"
@@ -374,7 +374,7 @@ const EmailSignup = () => {
               </button>
               {balance && (
                 <p className="mb-0">
-                  Balance: {Math.trunc(balance * 10000) / 10000}
+                  Balance: {Math.trunc(balance * 10000) / 10000} ETH
                 </p>
               )}
             </div>
@@ -386,7 +386,7 @@ const EmailSignup = () => {
         <>
           {/* Divider */}
           <hr className="my-4" />
-          <p>Send Transaction:</p>
+          <p class="section">Send Transaction</p>
           <div className=" mb-3">
             <div className="">
               <p>Destination:</p>
@@ -446,7 +446,7 @@ const EmailSignup = () => {
         <>
           {/* Divider */}
           <hr className="my-4" />
-          <p>Sign Message:</p>
+          <p class="section">Sign Message</p>
           <div className=" mb-3">
             <div className="">
               <textarea
@@ -493,14 +493,14 @@ const EmailSignup = () => {
     </div>
     /* return App*/
   );
-  /* return EmailSignup*/
+  /* return Web3Wallet */
 };
 
-// Define the root App component to include EmailSignup
+// Define the root App component to include Web3Wallet
 const App = () => {
   return (
     <div>
-      <EmailSignup />
+      <Web3Wallet />
     </div>
   );
 };
