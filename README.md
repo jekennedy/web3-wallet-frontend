@@ -32,7 +32,12 @@ It provides functionalities for user authentication, wallet creation, wallet man
 2. **Install dependencies:**
    `npm install`
 
-3. **Configure settings for Dynamic tenant:**
+3. **Configure environment variables :**
+   The application uses the following environment variables for configuration:
+
+   - `REACT_APP_API_URL`: The base URL for the [Web3 Wallet Backend](https://github.com/jekennedy/web3-wallet-backend).
+   - `REACT_APP_DYNAMIC_ENVIRONMENT_ID`: Environment ID of your Dynamic tenant.
+
    Refer to: ./src/App.js
 
 4. **Start The Application:**
