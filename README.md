@@ -18,7 +18,6 @@ It provides functionalities for user authentication, wallet creation, wallet man
 
 - **React**: Used for building the user interface.
 - **Bootstrap**: For styling components and layouts.
-- **Node.js**: Expected backend technology for handling API requests (not included in this repository).
 
 ## Setup and Installation
 
