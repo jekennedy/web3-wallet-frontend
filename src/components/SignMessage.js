@@ -1,5 +1,7 @@
-import { useEnv } from "../EnvContext";
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+
+import { useEnv } from "../EnvContext";
 
 const SignMessage = ({ JWT, selectedWallet }) => {
   const { API_SERVER } = useEnv();
@@ -15,11 +17,11 @@ const SignMessage = ({ JWT, selectedWallet }) => {
 
   const signMessage = () => {
     if (!selectedWallet) {
-      alert("Please select a wallet first.");
+      toast.error("A wallet must be selected first");
       return;
     }
     if (!message.trim()) {
-      alert("Please enter a message to sign.");
+      toast.error("Message is required");
       return;
     }
     fetch(`${API_SERVER}/wallets/${selectedWallet}/sign`, {
@@ -30,31 +32,34 @@ const SignMessage = ({ JWT, selectedWallet }) => {
       },
       body: JSON.stringify({ message }),
     })
-      .then((response) => {
+      .then(async (response) => {
         if (response.ok) {
           return response.json();
         } else {
-          throw new Error(`Failed to sign message: Status ${response.status}`);
+          const errorResponse = await response.json();
+          const errorMessage = errorResponse.error?.message || "Unknown error";
+          throw new Error(errorMessage);
         }
       })
       .then((data) => {
-        console.log("Sign message successful: Signed message %s", data.message);
         setSignedMessage(data.message);
+        toast.success("Message signed successfully!");
       })
       .catch((error) => {
-        console.error("Error signing message:", error);
+        toast.error(`Failed to sign message: ${error.message}`);
+        console.error("Error:", error);
       });
   };
 
   const copySignedMessage = () => {
     navigator.clipboard.writeText(signedMessage);
-    alert("Signed message copied to clipboard!");
+    toast.info("Signed message copied to clipboard!");
   };
 
   return (
     <>
       <hr className="my-4" />
-      <p class="section">Sign Message</p>
+      <p className="section">Sign Message</p>
       <div className=" mb-3">
         <div className="">
           <textarea

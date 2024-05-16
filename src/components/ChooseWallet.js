@@ -1,10 +1,20 @@
-import { useEnv } from "../EnvContext";
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
-const ChooseWallet = ({ JWT, wallets, selectedWallet, setSelectedWallet }) => {
+import { useEnv } from "../EnvContext";
+
+const ChooseWallet = ({
+  JWT,
+  wallets,
+  selectedWallet,
+  setSelectedWallet,
+  walletsRef,
+}) => {
   const { API_SERVER } = useEnv();
 
   const [balance, setBalance] = useState("");
+  // used for disabing/enabling spinner on button
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // update state when wallet is changed
@@ -13,9 +23,10 @@ const ChooseWallet = ({ JWT, wallets, selectedWallet, setSelectedWallet }) => {
 
   const fetchBalance = () => {
     if (!selectedWallet) {
-      alert("Please select a wallet first.");
+      toast.error("A wallet must first be selected");
       return;
     }
+    setLoading(true);
     fetch(`${API_SERVER}/wallets/${selectedWallet}/balance`, {
       method: "GET",
       headers: {
@@ -23,25 +34,31 @@ const ChooseWallet = ({ JWT, wallets, selectedWallet, setSelectedWallet }) => {
         "Content-Type": "application/json",
       },
     })
-      .then((response) => {
+      .then(async (response) => {
         if (response.ok) {
           return response.json();
         } else {
-          throw new Error("Failed to fetch balance");
+          const errorResponse = await response.json();
+          const errorMessage = errorResponse.error?.message || "Unknown error";
+          throw new Error(errorMessage);
         }
       })
       .then((data) => {
-        console.log("Get balance successful: Balance %s", data.balance);
         setBalance(data.balance);
+        toast.success("Balance retrieved successfully!");
       })
       .catch((error) => {
-        console.error("Error fetching balance:", error);
+        toast.error(`Failed to fetch balance: ${error.message}`);
+        console.error("Error:", error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
   const copyWalletAddress = () => {
     navigator.clipboard.writeText(selectedWallet);
-    alert("Wallet address copied to clipboard!");
+    toast.info("Wallet address copied to clipboard!");
   };
 
   return (
@@ -54,6 +71,7 @@ const ChooseWallet = ({ JWT, wallets, selectedWallet, setSelectedWallet }) => {
         <select
           id="walletDropdown"
           value={selectedWallet}
+          ref={walletsRef}
           onChange={(e) => {
             setBalance("");
             setSelectedWallet(e.target.options[e.target.selectedIndex].value);
@@ -84,8 +102,13 @@ const ChooseWallet = ({ JWT, wallets, selectedWallet, setSelectedWallet }) => {
             type="button"
             className="btn px-4 btn-primary primary-radius"
             onClick={fetchBalance}
+            disabled={loading}
           >
-            Get Balance
+            {loading ? (
+              <i className="fas fa-spinner fa-spin"></i>
+            ) : (
+              "Get Balance"
+            )}
           </button>
           {balance && (
             <p className="mb-0">

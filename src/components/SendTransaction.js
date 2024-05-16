@@ -1,5 +1,8 @@
-import { useEnv } from "../EnvContext";
 import React, { useState, useEffect } from "react";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import { toast } from "react-toastify";
+
+import { useEnv } from "../EnvContext";
 
 const SendTransaction = ({ JWT, selectedWallet }) => {
   const { API_SERVER } = useEnv();
@@ -7,6 +10,8 @@ const SendTransaction = ({ JWT, selectedWallet }) => {
   const [toAddress, setToAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [transactionHash, setTransactionHash] = useState("");
+  // used for disabing/enabling spinner on button
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // update state when wallet is changed
@@ -17,17 +22,19 @@ const SendTransaction = ({ JWT, selectedWallet }) => {
 
   const sendTransaction = () => {
     if (!selectedWallet) {
-      alert("Please select a wallet first.");
+      toast.error("A wallet must be selected first");
       return;
     }
     if (!toAddress.trim()) {
-      alert("Please enter a recipient address.");
+      toast.error("Recipient address is required");
       return;
     }
     if (!amount.trim() || isNaN(Number(amount))) {
-      alert("Please enter a valid amount.");
+      toast.error("Amount is required");
       return;
     }
+
+    setLoading(true);
 
     fetch(`${API_SERVER}/wallets/${selectedWallet}/sendTransaction`, {
       method: "POST",
@@ -37,34 +44,38 @@ const SendTransaction = ({ JWT, selectedWallet }) => {
       },
       body: JSON.stringify({ toAddress, amount }),
     })
-      .then((response) => {
+      .then(async (response) => {
         if (response.ok) {
           return response.json();
         } else {
-          throw new Error(
-            `Failed to send transaction: Status ${response.status}`
-          );
+          const errorResponse = await response.json();
+          const errorMessage = errorResponse.error?.message || "Unknown error";
+          throw new Error(errorMessage);
         }
       })
       .then((data) => {
-        console.log("Transaction successful: Hash %s", data.transactionHash);
         setTransactionHash(data.transactionHash);
+        toast.success("Transaction sent successfully!");
       })
       .catch((error) => {
-        console.error("Error sending transaction:", error);
+        toast.error(`Failed to send transaction: ${error.message}`);
+        console.error("Error:", error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
   const copyTransaction = () => {
     navigator.clipboard.writeText(transactionHash);
-    alert("Transaction hash copied to clipboard!");
+    toast.info("Transaction hash copied to clipboard!");
   };
 
   return (
     <>
       {/* Divider */}
       <hr className="my-4" />
-      <p class="section">Send Transaction</p>
+      <p className="section">Send Transaction</p>
       <div className=" mb-3">
         <div className="">
           <p>Destination:</p>
@@ -92,9 +103,10 @@ const SendTransaction = ({ JWT, selectedWallet }) => {
         <button
           type="button"
           onClick={sendTransaction}
+          disabled={loading}
           className="btn px-2 btn-primary primary-radius "
         >
-          Send
+          {loading ? <i className="fas fa-spinner fa-spin"></i> : "Send"}
         </button>
       </div>
 

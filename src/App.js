@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import "./App.css";
 
 import Login from "./components/Login";
@@ -15,8 +18,12 @@ const Web3Wallet = () => {
   const [selectedWallet, setSelectedWallet] = useState("");
   const [verifyingLogin, setVerifyingLogin] = useState(false);
 
+  const walletsRef = useRef("");
+
   return (
     <div className="App">
+      <ToastContainer />
+
       <h1 className="text-center mb-3">Signup / Login</h1>
       <Login
         setJWT={setJWT}
@@ -27,7 +34,11 @@ const Web3Wallet = () => {
       />
 
       {!verifyingLogin && JWT && (
-        <CreateWallet JWT={JWT} setWallets={setWallets} />
+        <CreateWallet
+          JWT={JWT}
+          setWallets={setWallets}
+          walletsRef={walletsRef}
+        />
       )}
 
       {!verifyingLogin && wallets.length > 0 && (
@@ -36,6 +47,7 @@ const Web3Wallet = () => {
           wallets={wallets}
           selectedWallet={selectedWallet}
           setSelectedWallet={setSelectedWallet}
+          walletsRef={walletsRef}
         />
       )}
 
