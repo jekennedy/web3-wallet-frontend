@@ -23,6 +23,7 @@ const Login = ({
   const otpInputRef = useRef(null);
 
   //TODO testing method to avoid hitting dynamic api
+  /*
   const sendEmailVerificationTest = async () => {
     console.log("setting jwt");
     setJWT(
@@ -34,6 +35,7 @@ const Login = ({
       "0x772d50d6af16bE57F5AaF4d0266317b987ba168d",
     ]);
   };
+  */
 
   const sendEmailVerification = () => {
     if (!email) {
@@ -107,41 +109,52 @@ const Login = ({
       .then((data) => {
         setJWT(data.jwt);
         setVerifyingLogin(false);
-        console.log("**** JWT is set to:", data.jwt);
 
-        return fetch(`${API_SERVER}/users/me`, {
+        fetch(`${API_SERVER}/users/me`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${data.jwt}`,
             "Content-Type": "application/json",
           },
-        });
-      })
-      .then(async (userResponse) => {
-        if (userResponse.ok) {
-          setVerifyingLogin(false);
-          return userResponse.json();
-        } else {
-          const errorResponse = await userResponse.json();
-          const errorMessage = errorResponse.error?.message || "Unknown error";
-          throw new Error(errorMessage);
-        }
-      })
-      .then((userData) => {
-        if (
-          userData.wallets &&
-          Array.isArray(userData.wallets) &&
-          userData.wallets.length > 0
-        ) {
-          const walletAddresses = userData.wallets.map(
-            (wallet) => wallet.address
-          );
-          setWallets(walletAddresses);
-        } else {
-          toast.error("No wallets found or unexpected response format");
-          console.log("Error", userData);
-          setWallets([]);
-        }
+        })
+          .then(async (userResponse) => {
+            if (userResponse.status === 404) {
+              // it's a new user scenario so suppress 404 error
+              return null;
+            }
+            if (userResponse.ok) {
+              return userResponse.json();
+            } else {
+              const errorResponse = await userResponse.json();
+              const errorMessage =
+                errorResponse.error?.message || "Unknown error";
+              throw new Error(errorMessage);
+            }
+          })
+          .then((userData) => {
+            if (userData) {
+              if (
+                userData.wallets &&
+                Array.isArray(userData.wallets) &&
+                userData.wallets.length > 0
+              ) {
+                const walletAddresses = userData.wallets.map(
+                  (wallet) => wallet.address
+                );
+                setWallets(walletAddresses);
+              } else {
+                toast.error("No wallets found or unexpected response format");
+                console.log("Error", userData);
+                setWallets([]);
+              }
+            } else {
+              setWallets([]);
+            }
+          })
+          .catch((err) => {
+            toast.error(`Error fetching user data: ${err.message}`);
+            console.error("Error:", err);
+          });
       })
       .catch((err) => {
         toast.error(`Error logging in: ${err.message}`);
